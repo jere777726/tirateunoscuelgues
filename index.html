@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>WHEELIE WORLD 3D — By Jere 🏍️🔥</title>
 
 <!-- Three.js para gráficos 3D -->
@@ -12,6 +12,7 @@
 * {
     box-sizing: border-box;
     user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
@@ -19,6 +20,7 @@ body {
     overflow: hidden;
     background: #09090b;
     font-family: 'Segoe UI', Arial, sans-serif;
+    touch-action: none;
 }
 
 canvas {
@@ -46,15 +48,16 @@ canvas {
     left: 20px;
     color: white;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 15px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     z-index: 5;
-    background: rgba(15, 23, 42, 0.75);
-    padding: 14px 20px;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 10px 16px;
     border-radius: 16px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.25);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: none;
 }
 
 #wheelie-indicator {
@@ -62,12 +65,12 @@ canvas {
     top: 20px;
     right: 20px;
     z-index: 5;
-    background: rgba(221, 42, 123, 0.85);
+    background: rgba(221, 42, 123, 0.9);
     color: white;
-    padding: 10px 20px;
+    padding: 10px 18px;
     border-radius: 12px;
     font-weight: bold;
-    font-size: 20px;
+    font-size: 16px;
     display: none;
     box-shadow: 0 0 20px #dd2a7b;
     animation: pulse 0.4s infinite alternate;
@@ -80,10 +83,10 @@ canvas {
 
 #combo-popup {
     position: fixed;
-    top: 40%;
+    top: 35%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 32px;
+    font-size: 30px;
     font-weight: 900;
     color: #facc15;
     text-shadow: 0 0 20px rgba(250, 204, 21, 0.9);
@@ -99,49 +102,82 @@ canvas {
     100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
 }
 
-#instagram-tag {
+#device-overlay {
     position: fixed;
-    bottom: 25px;
-    left: 25px;
-    z-index: 5;
-    font-weight: bold;
-    font-size: 16px;
-    text-decoration: none;
-    background: rgba(15, 23, 42, 0.75);
-    padding: 14px 22px;
-    border-radius: 35px;
-    backdrop-filter: blur(8px);
-    border: 2px solid rgba(255,255,255,0.4);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    inset: 0;
+    background: radial-gradient(circle, #2e1065 0%, #09090b 80%);
+    z-index: 20;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    animation: fadeInOverlay 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-#instagram-tag:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(221, 42, 123, 0.8);
+@keyframes fadeInOverlay {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.device-card-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 25px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.device-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px 15px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.device-card:hover, .device-card.active {
+    border-color: #f43f5e;
+    background: rgba(244, 63, 94, 0.25);
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 15px 35px rgba(244, 63, 94, 0.5);
+}
+
+.device-icon {
+    font-size: 45px;
+    margin-bottom: 10px;
+    animation: bounceIcon 2s infinite ease-in-out;
+}
+
+@keyframes bounceIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
 }
 
 #menu {
     position: fixed;
     inset: 0;
-    background: rgba(5, 5, 8, 0.92);
-    display: flex;
+    background: rgba(5, 5, 8, 0.95);
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 15;
     backdrop-filter: blur(15px);
 }
 
 .box {
     background: linear-gradient(135deg, #18181b 0%, #09090b 100%);
     color: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 28px;
     text-align: center;
-    width: 480px;
+    width: 440px;
+    max-width: 92vw;
     box-shadow: 0 25px 70px rgba(0,0,0,0.95);
     border: 2px solid rgba(221, 42, 123, 0.4);
     max-height: 90vh;
@@ -150,160 +186,247 @@ canvas {
 
 h1 {
     margin-top: 0;
-    font-size: 30px;
+    font-size: 26px;
     letter-spacing: 2px;
 }
 
 .creator-tag {
-    font-size: 14px;
+    font-size: 13px;
     color: #e4e4e7;
-    margin-top: -8px;
-    margin-bottom: 20px;
-    letter-spacing: 1.5px;
+    margin-top: -6px;
+    margin-bottom: 15px;
     font-weight: bold;
 }
 
 input, select {
     width: 100%;
-    padding: 14px;
-    margin: 8px 0;
+    padding: 12px;
+    margin: 6px 0;
     border-radius: 12px;
     border: 2px solid #3f3f46;
     background: #27272a;
     color: white;
-    font-size: 16px;
+    font-size: 15px;
     text-align: center;
     outline: none;
-    transition: border-color 0.2s;
-}
-
-input:focus, select:focus {
-    border-color: #dd2a7b;
-    box-shadow: 0 0 10px rgba(221, 42, 123, 0.4);
 }
 
 button {
     border: 0;
-    padding: 14px 26px;
-    margin-top: 15px;
+    padding: 13px 20px;
+    margin-top: 12px;
     border-radius: 12px;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
     color: white;
-    transition: transform 0.15s ease, box-shadow 0.2s;
     width: 100%;
     box-shadow: 0 6px 20px rgba(244, 63, 94, 0.5);
+    transition: transform 0.2s;
 }
 
-button:hover {
-    transform: scale(1.04);
-    box-shadow: 0 8px 25px rgba(244, 63, 94, 0.7);
+button:active {
+    transform: scale(0.97);
 }
 
 .secondary-btn {
     background: #3f3f46;
-    font-size: 14px;
-    padding: 10px 14px;
+    font-size: 13px;
+    padding: 9px 12px;
     box-shadow: none;
-}
-.secondary-btn:hover {
-    background: #52525b;
 }
 
 .bike-option {
     border: 2px solid #3f3f46;
-    border-radius: 14px;
-    padding: 12px 16px;
-    margin: 10px 0;
+    border-radius: 12px;
+    padding: 10px;
+    margin: 6px 0;
     cursor: pointer;
     background: #27272a;
-    transition: 0.2s;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
 }
 .bike-option.selected {
     border-color: #dd2a7b;
     background: rgba(221, 42, 123, 0.2);
-    box-shadow: 0 0 15px rgba(221, 42, 123, 0.4);
 }
 
-#controls {
+#mobile-controls {
+    position: fixed;
+    bottom: 95px;
+    left: 0;
+    width: 100%;
+    display: none;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.mob-group {
+    display: flex;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.mob-btn {
+    width: 62px;
+    height: 62px;
+    background: rgba(244, 63, 94, 0.85);
+    border: 2px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    cursor: pointer;
+}
+
+.mob-btn:active {
+    transform: scale(0.9);
+    background: rgba(225, 29, 72, 1);
+}
+
+#btn-wheelie-mob {
+    width: 110px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+    font-size: 13px;
+}
+
+#btn-camera-mob {
+    width: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    font-size: 20px;
+}
+
+#controls-hint {
     position: fixed;
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
     color: white;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     text-align: center;
-    background: rgba(15, 23, 42, 0.75);
-    padding: 10px 22px;
-    border-radius: 25px;
-    font-size: 14px;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
     backdrop-filter: blur(8px);
     z-index: 5;
     border: 1px solid rgba(255,255,255,0.25);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: none;
+}
+
+#instagram-tag {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 5;
+    font-weight: bold;
+    font-size: 14px;
+    text-decoration: none;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 10px 16px;
+    border-radius: 35px;
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .leaderboard-table {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 8px;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 13px;
 }
 .leaderboard-table th, .leaderboard-table td {
-    padding: 8px;
+    padding: 6px;
     border-bottom: 1px solid #3f3f46;
     text-align: center;
 }
-.leaderboard-table th {
-    color: #f43f5e;
-}
+.leaderboard-table th { color: #f43f5e; }
 </style>
 </head>
 
 <body>
 
-<!-- Reproductor de audio con selector musical -->
 <iframe id="music-player" width="0" height="0" src="https://www.youtube.com/embed/V6W3Mv9vL6k?autoplay=1&loop=1&playlist=V6W3Mv9vL6k" allow="autoplay" style="display:none;"></iframe>
 
-<div id="instagram-tag" onclick="openInstaModal()">
-    <span class="rainbow-text" style="font-size: 18px;">📸 IG: @___jere_777</span>
+<div id="instagram-tag" onclick="alert('¡Seguí a @___jere_777 en Instagram!')">
+    <span class="rainbow-text" style="font-size: 15px;">📸 IG: @___jere_777</span>
 </div>
 
 <div id="combo-popup">🔥 ¡CUELGUE PRO X2! 🔥</div>
 
-<div id="menu">
-    <div class="box" id="menu-box">
-        <div id="screen-register">
-            <h1 class="rainbow-text">🏍️ WHEELIE WORLD 3D</h1>
-            <div class="creator-tag">UNA OBRA MAESTRA DE <span class="rainbow-text" style="font-size: 16px;">JERE</span> 👑</div>
-            <p style="color: #d4d4d8;">Ingresá tu nombre para registrarte en la pista:</p>
-            <input type="text" id="username-input" placeholder="Tu nombre o apodo..." maxlength="15">
-            
-            <p style="font-size: 13px; color: #a1a1aa; margin-top: 15px;">¿Sos amigo de Jere? Ingresá tu código secreto:</p>
-            <input type="password" id="friend-code" placeholder="Código secreto (opcional)">
-            
-            <button onclick="registerUser()">¡ENTRAR AL JUEGO!</button>
+<div id="device-overlay">
+    <div style="font-size: 55px; margin-bottom: 10px;">🏍️🔥</div>
+    <h1 class="rainbow-text" style="font-size: 34px; letter-spacing: 3px;">WHEELIE WORLD 3D</h1>
+    <p style="color: #a1a1aa; font-size: 16px; margin-top:-5px;">El juego definitivo creado por <span class="rainbow-text">JERE</span></p>
+    
+    <p style="margin-top: 25px; font-weight: bold; font-size: 18px;">¿En qué vas a jugar, crack?</p>
+    
+    <div class="device-card-container">
+        <div class="device-card" onclick="chooseDevice('mobile')">
+            <div class="device-icon">📱</div>
+            <div style="font-size: 18px; font-weight: bold;">Celular</div>
+            <div style="font-size: 12px; color: #a1a1aa; margin-top: 5px;">Botones táctiles cómodos</div>
+        </div>
+        <div class="device-card" onclick="chooseDevice('pc')">
+            <div class="device-icon">💻</div>
+            <div style="font-size: 18px; font-weight: bold;">PC / Compu</div>
+            <div style="font-size: 12px; color: #a1a1aa; margin-top: 5px;">Jugás con el teclado</div>
         </div>
     </div>
 </div>
 
-<div id="ui" style="display: none;">
+<div id="mobile-controls">
+    <div class="mob-group">
+        <button class="mob-btn" ontouchstart="pressKey('a', true)" ontouchend="pressKey('a', false)" onmousedown="pressKey('a', true)" onmouseup="pressKey('a', false)">◀</button>
+        <button class="mob-btn" ontouchstart="pressKey('d', true)" ontouchend="pressKey('d', false)" onmousedown="pressKey('d', true)" onmouseup="pressKey('d', false)">▶</button>
+    </div>
+    <div class="mob-group">
+        <button class="mob-btn" id="btn-camera-mob" onclick="toggleCameraMode()">🎥</button>
+        <button class="mob-btn" id="btn-wheelie-mob" ontouchstart="pressKey(' ', true)" ontouchend="pressKey(' ', false)" onmousedown="pressKey(' ', true)" onmouseup="pressKey(' ', false)">WHEELIE</button>
+        <button class="mob-btn" ontouchstart="pressKey('w', true)" ontouchend="pressKey('w', false)" onmousedown="pressKey('w', true)" onmouseup="pressKey('w', false)">🚀</button>
+    </div>
+</div>
+
+<div id="menu">
+    <div class="box" id="menu-box">
+        <h1 class="rainbow-text">⚡ MENÚ PRINCIPAL ⚡</h1>
+        <div class="creator-tag">POR <span class="rainbow-text">JERE</span> | 💰 $<span id="menu-money">0</span></div>
+
+        <p style="color: #d4d4d8; font-size:14px; text-align: left; margin-bottom:2px;">Tu apodo en la pista:</p>
+        <input type="text" id="username-input" placeholder="Tu nombre..." maxlength="15">
+        
+        <p style="font-size: 12px; color: #a1a1aa; margin-top: 6px; text-align: left;">¿Código secreto de amigo de Jere?</p>
+        <input type="password" id="friend-code" placeholder="Código (opcional)">
+        
+        <button onclick="registerUser()">¡ENTRAR AL LOBBY!</button>
+    </div>
+</div>
+
+<div id="ui">
     👤 <span id="display-user" class="rainbow-text">Jugador</span> | 🏆 Récord: <span id="record">0</span> m<br>
     📏 Distancia: <span id="distance">0</span> m | 💰 Dinero: $<span id="money">0</span>
 </div>
 
-<div id="wheelie-indicator">🔥 ¡WHEELIE HACIA ADELANTE (INVERT)! 🔥</div>
+<div id="wheelie-indicator">🔥 ¡WHEELIE PRO! 🔥</div>
 
-<div id="controls" style="display: none;">
-    W / ↑ = Acelerar &nbsp;|&nbsp; ESPACIO = Wheelie Delantero &nbsp;|&nbsp; A / D o ← / → = Carriles
+<div id="controls-hint">
+    W / ↑ = Acelerar &nbsp;|&nbsp; ESPACIO = Wheelie &nbsp;|&nbsp; A/D = Carriles &nbsp;|&nbsp; C = Cambiar Cámara
 </div>
 
 <script>
@@ -311,147 +434,144 @@ let scene, camera, renderer;
 let playing = false;
 let username = localStorage.getItem("ww_user") || "";
 let isFriend = localStorage.getItem("ww_friend") === "true";
-let selectedBikeColor = localStorage.getItem("ww_bike") || "red";
+let selectedDevice = localStorage.getItem("ww_device") || "";
+let selectedBikeColor = localStorage.getItem("ww_bike") || "green";
 let selectedMusic = localStorage.getItem("ww_music") || "V6W3Mv9vL6k";
+let cameraMode = localStorage.getItem("ww_cam") || "third"; // 'first' o 'third'
 
 let money = Number(localStorage.getItem("money")) || 0;
-
-let upgrades = {
-    speed: Number(localStorage.getItem("up_speed")) || 1,
-    handling: Number(localStorage.getItem("up_handling")) || 1
-};
-
+let upgrades = { speed: Number(localStorage.getItem("up_speed")) || 1 };
 let leaderboard = JSON.parse(localStorage.getItem("ww_leaderboard")) || [
     { name: "Jere 👑", score: 1500 },
-    { name: "Marquitos", score: 920 },
-    { name: "Valentín", score: 650 }
+    { name: "Marquitos", score: 920 }
 ];
 
-let bikeGroup, frontWheel, rearWheel;
-let bike = {
-    x: 0,
-    targetX: 0,
-    z: 0,
-    speed: 0,
-    distance: 0,
-    isWheelie: false
-};
-
+let bikeGroup, cockpitGroup;
+let bike = { x: 0, targetX: 0, z: 0, speed: 0, distance: 0, isWheelie: false };
 let trafficCars = [];
-
 const keys = {};
-addEventListener("keydown", e => { keys[e.key.toLowerCase()] = true; });
+
+addEventListener("keydown", e => {
+    if(e.key.toLowerCase() === 'c') toggleCameraMode();
+    keys[e.key.toLowerCase()] = true;
+});
 addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
 
-if(username) {
-    showMainLobby();
+function pressKey(k, isDown) {
+    keys[k] = isDown;
 }
 
-function openInstaModal() {
-    alert("¡Seguí a @___jere_777 en Instagram para apoyar los juegos oficiales de Jere! 📸🔥");
+if(selectedDevice) {
+    document.getElementById("device-overlay").style.display = "none";
+    document.getElementById("menu").style.display = "flex";
+    if(username) showMainLobby();
+}
+
+function chooseDevice(dev) {
+    selectedDevice = dev;
+    localStorage.setItem("ww_device", dev);
+    document.getElementById("device-overlay").style.display = "none";
+    document.getElementById("menu").style.display = "flex";
 }
 
 function registerUser() {
     let nameVal = document.getElementById("username-input").value.trim();
     let codeVal = document.getElementById("friend-code").value.trim();
-
-    if(!nameVal) {
-        alert("¡Ponete un nombre para arrancar en la pista!");
-        return;
-    }
+    if(!nameVal) { alert("¡Ponete un nombre!"); return; }
 
     username = nameVal;
     localStorage.setItem("ww_user", username);
-
-    if(codeVal === "2012") {
-        isFriend = true;
-        localStorage.setItem("ww_friend", "true");
-        alert("¡Código correcto! Modo AMIGO exclusivo desbloqueado por Jere 👑.");
-    } else {
-        isFriend = false;
-        localStorage.setItem("ww_friend", "false");
-    }
-
+    isFriend = (codeVal === "2012");
+    localStorage.setItem("ww_friend", isFriend);
     showMainLobby();
 }
 
 function changeMusic(selectObj) {
-    let videoId = selectObj.value;
-    selectedMusic = videoId;
-    localStorage.setItem("ww_music", videoId);
-    document.getElementById("music-player").src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
+    selectedMusic = selectObj.value;
+    localStorage.setItem("ww_music", selectedMusic);
+    document.getElementById("music-player").src = `https://www.youtube.com/embed/${selectedMusic}?autoplay=1&loop=1&playlist=${selectedMusic}`;
+}
+
+function toggleCameraMode() {
+    cameraMode = (cameraMode === 'third') ? 'first' : 'third';
+    localStorage.setItem("ww_cam", cameraMode);
+    showPopup(cameraMode === 'third' ? "🎥 Cámara: 3ra Persona" : "🏍️ Cámara: 1ra Persona (POV)");
+    updateBikeVisibility();
+}
+
+function updateBikeVisibility() {
+    if(bikeGroup && cockpitGroup) {
+        if(cameraMode === 'third') {
+            bikeGroup.visible = true;
+            cockpitGroup.visible = false;
+        } else {
+            bikeGroup.visible = false;
+            cockpitGroup.visible = true;
+        }
+    }
 }
 
 function showMainLobby() {
     document.getElementById("ui").style.display = "block";
-    document.getElementById("controls").style.display = "block";
-    document.getElementById("display-user").textContent = username + (isFriend ? " ⭐ [Amigo]" : "");
-    
+    if(selectedDevice === 'pc') {
+        document.getElementById("controls-hint").style.display = "block";
+    }
+    document.getElementById("display-user").textContent = username + (isFriend ? " ⭐" : "");
     updateMenuUI();
 
     let userRecordObj = leaderboard.find(item => item.name === username);
-    let myRecord = userRecordObj ? userRecordObj.score : 0;
-    document.getElementById("record").textContent = myRecord;
+    document.getElementById("record").textContent = userRecordObj ? userRecordObj.score : 0;
 
-    let leaderboardHTML = `
-        <table class="leaderboard-table">
-            <tr><th>#</th><th>Piloto</th><th>Récord (m)</th></tr>
-    `;
+    let leaderboardHTML = `<table class="leaderboard-table"><tr><th>#</th><th>Piloto</th><th>Récord</th></tr>`;
     leaderboard.sort((a,b) => b.score - a.score);
-    leaderboard.slice(0, 5).forEach((entry, idx) => {
+    leaderboard.slice(0, 4).forEach((entry, idx) => {
         leaderboardHTML += `<tr><td>${idx+1}</td><td><b>${entry.name}</b></td><td>${entry.score} m</td></tr>`;
     });
     leaderboardHTML += `</table>`;
 
     document.getElementById("menu-box").innerHTML = `
         <h1 class="rainbow-text">⚡ MENÚ PRINCIPAL ⚡</h1>
-        <div class="creator-tag">CREADO POR <span class="rainbow-text">JERE</span></div>
-        <p>Piloto: <b>${username}</b> ${isFriend ? '👑' : ''} | 💰 Dinero: $<span id="menu-money">${money}</span></p>
+        <div class="creator-tag">POR <span class="rainbow-text">JERE</span> | 💰 $<span id="menu-money">${money}</span></div>
 
-        <!-- Selector de Música -->
-        <div style="text-align: left; margin: 10px 0; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px;">
-            <div style="font-size: 13px; margin-bottom: 5px; color:#e4e4e7; font-weight:bold;">🎵 Música ATR para la Pista:</div>
-            <select onchange="changeMusic(this)">
+        <div style="text-align: left; margin: 6px 0; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 10px;">
+            <div style="font-size: 12px; color:#e4e4e7; font-weight:bold;">🎥 Vista de Cámara:</div>
+            <button class="secondary-btn" onclick="toggleCameraMode()" style="background:#0891b2; margin-top:4px;">Modo Actual: <span id="cam-label">${cameraMode === 'third' ? '3ra Persona (Externa)' : '1ra Persona (POV)'}</span></button>
+        </div>
+
+        <div style="text-align: left; margin: 6px 0; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 10px;">
+            <div style="font-size: 12px; color:#e4e4e7; font-weight:bold;">🎵 Música:</div>
+            <select onchange="changeMusic(this)" style="padding: 8px; font-size: 13px;">
                 <option value="V6W3Mv9vL6k" ${selectedMusic === 'V6W3Mv9vL6k' ? 'selected' : ''}>Motor / Electrónica Pro</option>
-                <option value="5qap5aO4i9A" ${selectedMusic === '5qap5aO4i9A' ? 'selected' : ''}>Lo-Fi Chill Concentración</option>
-                <option value="jfKfPfyJRdk" ${selectedMusic === 'jfKfPfyJRdk' ? 'selected' : ''}>Lo-Fi Beats Urbano</option>
+                <option value="5qap5aO4i9A" ${selectedMusic === '5qap5aO4i9A' ? 'selected' : ''}>Lo-Fi Chill</option>
             </select>
         </div>
 
-        <div style="text-align: left; margin: 10px 0; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px;">
-            <div style="font-size: 13px; margin-bottom: 5px; color:#e4e4e7; font-weight:bold;">🏆 Salón de la Fama Global:</div>
+        <div style="text-align: left; margin: 6px 0; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 10px;">
+            <div style="font-size: 12px; color:#e4e4e7; font-weight:bold;">🏆 Salón de la Fama:</div>
             ${leaderboardHTML}
         </div>
 
-        <div style="text-align: left; margin: 10px 0; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px;">
-            <div style="font-size: 12px; margin-bottom: 5px; color:#e4e4e7; font-weight:bold;">🔧 Taller y Motos Turras:</div>
-            <button class="secondary-btn" onclick="buyUpgrade('speed')">Velocidad Máx (Nv. <span id="lvl-speed">${upgrades.speed}</span>) - $<span id="cost-speed">${upgrades.speed * 100}</span></button>
-            <div style="display: flex; gap: 6px; margin-top: 6px;">
-                <div class="bike-option ${selectedBikeColor === 'red' ? 'selected' : ''}" onclick="selectBike('red')" style="flex:1; padding:8px; font-size:13px;">🔥 Roja</div>
-                <div class="bike-option ${selectedBikeColor === 'gold' ? 'selected' : ''}" onclick="selectBike('gold')" style="flex:1; padding:8px; font-size:13px;">🌟 Dorada</div>
-                <div class="bike-option ${selectedBikeColor === 'cyber' ? 'selected' : ''}" onclick="selectBike('cyber')" style="flex:1; padding:8px; font-size:13px;">⚡ Cyber</div>
+        <div style="text-align: left; margin: 6px 0; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 10px;">
+            <div style="font-size: 12px; color:#e4e4e7; font-weight:bold;">🔧 Estilo de Moto:</div>
+            <button class="secondary-btn" onclick="buyUpgrade()">Velocidad (Nv. ${upgrades.speed}) - $<span id="cost">${upgrades.speed * 100}</span></button>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+                <div class="bike-option ${selectedBikeColor === 'green' ? 'selected' : ''}" onclick="selectBike('green')" style="flex:1; padding:6px; font-size:11px;">🟢 Verde</div>
+                <div class="bike-option ${selectedBikeColor === 'gold' ? 'selected' : ''}" onclick="selectBike('gold')" style="flex:1; padding:6px; font-size:11px;">🌟 Oro</div>
+                <div class="bike-option ${selectedBikeColor === 'cyber' ? 'selected' : ''}" onclick="selectBike('cyber')" style="flex:1; padding:6px; font-size:11px;">⚡ Cyber</div>
             </div>
         </div>
 
-        <button onclick="startGame()">¡SALIR A RODAR YA!</button>
-        <button class="secondary-btn" style="background:#27272a; margin-top:6px;" onclick="logout()">Cambiar de usuario</button>
+        <button onclick="startGame()">¡SALIR A RODAR!</button>
     `;
 }
 
 function selectBike(color) {
     if((color === 'gold' || color === 'cyber') && !isFriend) {
-        alert("¡Epa! Estas motos especiales son exclusivas para amigos con código secreto de Jere.");
-        return;
+        alert("¡Motos exclusivas para amigos de Jere!"); return;
     }
     selectedBikeColor = color;
     localStorage.setItem("ww_bike", color);
     showMainLobby();
-}
-
-function logout() {
-    localStorage.removeItem("ww_user");
-    localStorage.removeItem("ww_friend");
-    location.reload();
 }
 
 function updateMenuUI() {
@@ -460,11 +580,10 @@ function updateMenuUI() {
     if(mm) mm.textContent = money;
 }
 
-function buyUpgrade(type) {
+function buyUpgrade() {
     let cost = upgrades.speed * 100;
     if(money >= cost) {
-        money -= cost;
-        upgrades.speed++;
+        money -= cost; upgrades.speed++;
         localStorage.setItem("money", money);
         localStorage.setItem("up_speed", upgrades.speed);
         showMainLobby();
@@ -477,169 +596,157 @@ function init3D() {
     scene.fog = new THREE.FogExp2(0x0a0a0f, 0.012);
 
     camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 3.5, 7);
-    camera.lookAt(0, 1.2, 0);
-
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    let dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
     dirLight.position.set(20, 40, 20);
-    dirLight.castShadow = true;
     scene.add(dirLight);
 
-    const roadGeo = new THREE.PlaneGeometry(16, 6000);
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.9 });
-    const road = new THREE.Mesh(roadGeo, roadMat);
-    road.rotation.x = -Math.PI / 2;
-    road.position.set(0, 0, -3000);
+    let road = new THREE.Mesh(new THREE.PlaneGeometry(16, 6000), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+    road.rotation.x = -Math.PI / 2; road.position.set(0, 0, -3000);
     scene.add(road);
 
     for(let z = 0; z > -6000; z -= 30) {
-        let lineGeo = new THREE.PlaneGeometry(0.4, 12);
-        let lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
-        let line = new THREE.Mesh(lineGeo, lineMat);
-        line.rotation.x = -Math.PI / 2;
-        line.position.set(-2.2, 0.02, z);
-        scene.add(line);
-
-        let line2 = new THREE.Mesh(lineGeo, lineMat);
-        line2.rotation.x = -Math.PI / 2;
-        line2.position.set(2.2, 0.02, z);
-        scene.add(line2);
+        let line = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 12), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        line.rotation.x = -Math.PI / 2; line.position.set(-2.2, 0.02, z); scene.add(line);
+        let line2 = line.clone(); line2.position.set(2.2, 0.02, z); scene.add(line2);
     }
 
-    createDetailedBike3D();
+    createFullModels();
     createTrafficAndEnvironment();
+    updateBikeVisibility();
 }
 
-function createDetailedBike3D() {
+function createFullModels() {
+    let col = selectedBikeColor === 'gold' ? 0xeab308 : (selectedBikeColor === 'cyber' ? 0x06b6d4 : 0x84cc16);
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 });
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, roughness: 0.2 });
+    const tankMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.25, metalness: 0.3 });
+    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+
+    // --- 1. MODELO TERCERA PERSONA (Orientado mirando al frente -Z) ---
     bikeGroup = new THREE.Group();
-
-    let mainColor = 0xf43f5e;
-    if(selectedBikeColor === 'gold') mainColor = 0xeab308;
-    if(selectedBikeColor === 'cyber') mainColor = 0x06b6d4;
-
-    const wheelGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.35, 24);
-    wheelGeo.rotateX(Math.PI / 2);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4 });
+    let wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
     
-    rearWheel = new THREE.Mesh(wheelGeo, wheelMat);
-    rearWheel.position.set(0, 0.7, -1.3);
-    rearWheel.castShadow = true;
-    bikeGroup.add(rearWheel);
+    let rearWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.35, 24).rotateX(Math.PI/2), wheelMat);
+    rearWheel.position.set(0, 0.65, -1.2); bikeGroup.add(rearWheel);
 
-    frontWheel = new THREE.Mesh(wheelGeo, wheelMat);
-    frontWheel.position.set(0, 0.7, 1.3);
-    frontWheel.castShadow = true;
-    bikeGroup.add(frontWheel);
+    let frontWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.35, 24).rotateX(Math.PI/2), wheelMat);
+    frontWheel.position.set(0, 0.65, 1.4); bikeGroup.add(frontWheel);
 
-    const bodyGeo = new THREE.BoxGeometry(0.9, 0.8, 2.2);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: mainColor, metalness: 0.7, roughness: 0.3 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.set(0, 1.2, 0);
-    body.castShadow = true;
-    bikeGroup.add(body);
+    let body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 2.3), tankMat);
+    body.position.set(0, 1.15, 0); bikeGroup.add(body);
 
-    const handleGeo = new THREE.BoxGeometry(1.6, 0.2, 0.3);
-    const handleMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const handle = new THREE.Mesh(handleGeo, handleMat);
-    handle.position.set(0, 1.8, 1.0);
-    bikeGroup.add(handle);
+    let seat = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.3, 1.2), darkMat);
+    seat.position.set(0, 1.7, -0.4); bikeGroup.add(seat);
 
-    const torsoGeo = new THREE.BoxGeometry(0.7, 1.0, 0.5);
-    const torsoMat = new THREE.MeshStandardMaterial({ color: selectedBikeColor === 'cyber' ? 0x8b5cf6 : 0x0284c7 });
-    const torso = new THREE.Mesh(torsoGeo, torsoMat);
-    torso.position.set(0, 2.1, -0.2);
-    bikeGroup.add(torso);
+    // Piloto sentado en tercera persona
+    let riderBody = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.7), new THREE.MeshStandardMaterial({ color: 0x27272a }));
+    riderBody.position.set(0, 2.2, -0.2); bikeGroup.add(riderBody);
 
-    const headGeo = new THREE.SphereGeometry(0.35, 16, 16);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
-    const head = new THREE.Mesh(headGeo, headMat);
-    head.position.set(0, 2.8, -0.1);
-    bikeGroup.add(head);
-
-    const visorGeo = new THREE.BoxGeometry(0.3, 0.15, 0.2);
-    const visorMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
-    const visor = new THREE.Mesh(visorGeo, visorMat);
-    visor.position.set(0, 2.8, 0.22);
-    bikeGroup.add(visor);
+    let riderHead = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b })); // Casco
+    riderHead.position.set(0, 2.9, -0.2); bikeGroup.add(riderHead);
 
     scene.add(bikeGroup);
+
+    // --- 2. MODELO PRIMERA PERSONA (POV) ---
+    cockpitGroup = new THREE.Group();
+
+    let tank = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.0, 16), tankMat);
+    tank.rotation.x = Math.PI / 2;
+    tank.position.set(0, -0.6, 0.5);
+    cockpitGroup.add(tank);
+
+    let gasCap = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.08, 16), metalMat);
+    gasCap.position.set(0, -0.15, -0.2);
+    cockpitGroup.add(gasCap);
+
+    let handlebar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.6).rotateZ(Math.PI/2), metalMat);
+    handlebar.position.set(0, 0.2, -0.6);
+    cockpitGroup.add(handlebar);
+
+    let dashBase = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.3, 0.4), darkMat);
+    dashBase.position.set(0, 0.35, -0.7);
+    cockpitGroup.add(dashBase);
+
+    let gaugeLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.1, 16), metalMat);
+    gaugeLeft.rotation.x = Math.PI / 2;
+    gaugeLeft.position.set(-0.28, 0.45, -0.7);
+    cockpitGroup.add(gaugeLeft);
+
+    let gaugeRight = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.1, 16), metalMat);
+    gaugeRight.rotation.x = Math.PI / 2;
+    gaugeRight.position.set(0.28, 0.45, -0.7);
+    cockpitGroup.add(gaugeRight);
+
+    let stemLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.8).rotateZ(-Math.PI/4), metalMat);
+    stemLeft.position.set(-1.2, 0.9, -0.5);
+    cockpitGroup.add(stemLeft);
+    let mirrorLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.08, 16).rotateX(Math.PI/2), metalMat);
+    mirrorLeft.position.set(-1.9, 1.5, -0.3);
+    cockpitGroup.add(mirrorLeft);
+
+    let stemRight = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.8).rotateZ(Math.PI/4), metalMat);
+    stemRight.position.set(1.2, 0.9, -0.5);
+    cockpitGroup.add(stemRight);
+    let mirrorRight = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.08, 16).rotateX(Math.PI/2), metalMat);
+    mirrorRight.position.set(1.9, 1.5, -0.3);
+    cockpitGroup.add(mirrorRight);
+
+    let gloveLeft = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.6), gloveMat);
+    gloveLeft.position.set(-1.1, 0.15, -0.5);
+    cockpitGroup.add(gloveLeft);
+
+    let gloveRight = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.6), gloveMat);
+    gloveRight.position.set(1.1, 0.15, -0.5);
+    cockpitGroup.add(gloveRight);
+
+    scene.add(cockpitGroup);
 }
 
 function createTrafficAndEnvironment() {
     for(let z = -100; z > -6000; z -= 140) {
-        let laneChoice = (Math.floor(Math.random() * 3) - 1) * 3.5;
-        
-        let carGroup = new THREE.Group();
-        
-        const carBodyGeo = new THREE.BoxGeometry(2.2, 1.2, 4.5);
-        let carColors = [0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6];
-        let randomColor = carColors[Math.floor(Math.random() * carColors.length)];
-        const carMat = new THREE.MeshStandardMaterial({ color: randomColor, metalness: 0.6 });
-        let carBody = new THREE.Mesh(carBodyGeo, carMat);
-        carBody.position.set(0, 0.8, 0);
-        carBody.castShadow = true;
-        carGroup.add(carBody);
-
-        const carTopGeo = new THREE.BoxGeometry(1.8, 0.9, 2.4);
-        const carTopMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 });
-        let carTop = new THREE.Mesh(carTopGeo, carTopMat);
-        carTop.position.set(0, 1.7, -0.2);
-        carGroup.add(carTop);
-
-        carGroup.position.set(laneChoice, 0, z);
-        scene.add(carGroup);
-        trafficCars.push(carGroup);
+        let lane = (Math.floor(Math.random() * 3) - 1) * 3.5;
+        let car = new THREE.Group();
+        let body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.2, 4.5), new THREE.MeshStandardMaterial({ color: 0x3b82f6 }));
+        body.position.set(0, 0.8, 0); car.add(body);
+        car.position.set(lane, 0, z);
+        scene.add(car);
+        trafficCars.push(car);
     }
 }
 
 function startGame() {
     document.getElementById("menu").style.display = "none";
-    playing = true;
-    bike.z = 0;
-    bike.x = 0;
-    bike.targetX = 0;
-    bike.speed = 0.5;
-    bike.distance = 0;
-    bike.isWheelie = false;
-    trafficCars = [];
-    
-    if(!scene) {
-        init3D();
+    if(selectedDevice === 'mobile') {
+        document.getElementById("mobile-controls").style.display = "flex";
     }
+    playing = true;
+    bike.z = 0; bike.x = 0; bike.targetX = 0; bike.speed = 0.5; bike.distance = 0; bike.isWheelie = false;
+    trafficCars = [];
+    if(!scene) init3D();
+    updateBikeVisibility();
     requestAnimationFrame(gameLoop);
 }
 
 function showPopup(text) {
     let p = document.getElementById("combo-popup");
-    p.textContent = text;
-    p.style.display = "block";
+    p.textContent = text; p.style.display = "block";
     setTimeout(() => { p.style.display = "none"; }, 600);
 }
 
 function update() {
     let maxSpd = 0.8 + (upgrades.speed * 0.12);
-    let handlingSpeed = 0.18;
-
-    if(keys["w"] || keys["arrowup"]) {
-        bike.speed += 0.02;
-    } else {
-        bike.speed -= 0.005;
-    }
+    if(keys["w"] || keys["arrowup"]) bike.speed += 0.02;
+    else bike.speed -= 0.005;
     bike.speed = Math.max(0.3, Math.min(bike.speed, maxSpd));
 
-    // WHEELIE HACIA ADELANTE (INVERT / ESTILO ARGENTINO CON BARRA ESPACIADORA)
     if(keys[" "]) {
-        if(!bike.isWheelie) {
-            showPopup("🔥 ¡COMIENZA EL CUELGUE! 🔥");
-        }
+        if(!bike.isWheelie) showPopup("🔥 ¡WHEELIE PRO! 🔥");
         bike.isWheelie = true;
         document.getElementById("wheelie-indicator").style.display = "block";
     } else {
@@ -647,69 +754,62 @@ function update() {
         document.getElementById("wheelie-indicator").style.display = "none";
     }
 
-    if((keys["a"] || keys["arrowleft"]) && bike.targetX > -3.5) {
-        bike.targetX = -3.5;
-    }
-    if((keys["d"] || keys["arrowright"]) && bike.targetX < 3.5) {
-        bike.targetX = 3.5;
-    }
+    if((keys["a"] || keys["arrowleft"]) && bike.targetX > -3.5) bike.targetX = -3.5;
+    if((keys["d"] || keys["arrowright"]) && bike.targetX < 3.5) bike.targetX = 3.5;
 
-    bike.x += (bike.targetX - bike.x) * handlingSpeed;
-    bike.z -= bike.speed;
-    
-    let distanceMultiplier = bike.isWheelie ? 2.5 : 1.0;
-    bike.distance += bike.speed * distanceMultiplier * 2;
+    bike.x += (bike.targetX - bike.x) * 0.18;
+    bike.z -= bike.speed; // Avanza hacia adelante por la pista
+    bike.distance += bike.speed * (bike.isWheelie ? 2.5 : 1.0) * 2;
 
-    if(bikeGroup) {
-        bikeGroup.position.x = bike.x;
-        bikeGroup.position.z = bike.z;
-        
-        // Inclinación hacia ADELANTE (¡Estilo wheelie frontal argentino!)
-        if(bike.isWheelie) {
-            bikeGroup.rotation.x = 0.42;
-            camera.position.set(bike.x * 0.5, 3.0, bike.z + 6.5);
-        } else {
-            bikeGroup.rotation.x = 0;
-            camera.position.set(bike.x * 0.5, 3.5, bike.z + 7);
+    if(cameraMode === 'third') {
+        if(bikeGroup) {
+            bikeGroup.position.x = bike.x;
+            bikeGroup.position.z = bike.z;
+            if(bike.isWheelie) {
+                bikeGroup.rotation.x = -0.4;
+                camera.position.set(bike.x * 0.5, 3.2, bike.z + 7.5); // Cámara ubicada atrás de la moto mirando hacia adelante
+            } else {
+                bikeGroup.rotation.x = 0;
+                camera.position.set(bike.x * 0.5, 3.6, bike.z + 8);
+            }
+            camera.lookAt(bike.x, 1.2, bike.z - 10);
         }
-
-        camera.lookAt(bike.x, 1.2, bike.z - 5);
-
-        rearWheel.rotation.x -= bike.speed * 0.5;
-        frontWheel.rotation.x -= bike.speed * 0.5;
+    } else {
+        if(cockpitGroup) {
+            cockpitGroup.position.x = bike.x;
+            cockpitGroup.position.z = bike.z;
+            if(bike.isWheelie) {
+                cockpitGroup.rotation.x = 0.35;
+                camera.position.set(bike.x, 0.4, bike.z + 0.2);
+            } else {
+                cockpitGroup.rotation.x = 0;
+                camera.position.set(bike.x, 0.6, bike.z + 0.5);
+            }
+            camera.rotation.z = - (bike.x - bike.targetX) * 0.05;
+            camera.lookAt(bike.x, 0.5, bike.z - 20);
+        }
     }
 
     for(let car of trafficCars) {
-        let distZ = Math.abs(car.position.z - bike.z);
-        let distX = Math.abs(car.position.x - bike.x);
-        if(distZ < 2.5 && distX < 1.6) {
-            crash();
-        }
+        if(Math.abs(car.position.z - bike.z) < 2.8 && Math.abs(car.position.x - bike.x) < 1.6) crash();
     }
-
     document.getElementById("distance").textContent = Math.floor(bike.distance);
 }
 
 function crash() {
     playing = false;
     document.getElementById("wheelie-indicator").style.display = "none";
+    document.getElementById("mobile-controls").style.display = "none";
     let score = Math.floor(bike.distance);
     let earned = score * (isFriend ? 3 : 2);
 
     let existingUser = leaderboard.find(item => item.name === username);
-    if(existingUser) {
-        if(score > existingUser.score) {
-            existingUser.score = score;
-        }
-    } else {
-        leaderboard.push({ name: username, score: score });
-    }
+    if(existingUser) { if(score > existingUser.score) existingUser.score = score; }
+    else leaderboard.push({ name: username, score: score });
     localStorage.setItem("ww_leaderboard", JSON.stringify(leaderboard));
 
     money += earned;
     localStorage.setItem("money", money);
-    updateMenuUI();
-
     document.getElementById("menu").style.display = "flex";
     showMainLobby();
 }
