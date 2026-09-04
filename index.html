@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHEELIE WORLD 3D — By Jere 🏍️🔥</title>
+
+<!-- Three.js para gráficos 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #09090b;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+canvas {
+    display: block;
+}
+
+.rainbow-text {
+    background: linear-gradient(270deg, #f58529, #dd2a7b, #8134af, #515bd4, #00f2fe, #4facfe);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbowGlow 5s ease infinite;
+    filter: drop-shadow(0 0 10px rgba(221, 42, 123, 0.6));
+}
+
+@keyframes rainbowGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#ui {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    z-index: 5;
+    background: rgba(15, 23, 42, 0.75);
+    padding: 14px 20px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+#wheelie-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 5;
+    background: rgba(221, 42, 123, 0.85);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 20px;
+    display: none;
+    box-shadow: 0 0 20px #dd2a7b;
+    animation: pulse 0.4s infinite alternate;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.08); }
+}
+
+#combo-popup {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: 900;
+    color: #facc15;
+    text-shadow: 0 0 20px rgba(250, 204, 21, 0.9);
+    z-index: 6;
+    display: none;
+    pointer-events: none;
+    animation: popAnim 0.6s ease-out forwards;
+}
+
+@keyframes popAnim {
+    0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
+}
+
+#instagram-tag {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 5;
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: none;
+    background: rgba(15, 23, 42, 0.75);
+    padding: 14px 22px;
+    border-radius: 35px;
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#instagram-tag:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(221, 42, 123, 0.8);
+}
+
+#menu {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 8, 0.92);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(15px);
+}
+
+.box {
+    background: linear-gradient(135deg, #18181b 0%, #09090b 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 28px;
+    text-align: center;
+    width: 480px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.95);
+    border: 2px solid rgba(221, 42, 123, 0.4);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 30px;
+    letter-spacing: 2px;
+}
+
+.creator-tag {
+    font-size: 14px;
+    color: #e4e4e7;
+    margin-top: -8px;
+    margin-bottom: 20px;
+    letter-spacing: 1.5px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    border: 2px solid #3f3f46;
+    background: #27272a;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+    border-color: #dd2a7b;
+    box-shadow: 0 0 10px rgba(221, 42, 123, 0.4);
+}
+
+button {
+    border: 0;
+    padding: 14px 26px;
+    margin-top: 15px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    color: white;
+    transition: transform 0.15s ease, box-shadow 0.2s;
+    width: 100%;
+    box-shadow: 0 6px 20px rgba(244, 63, 94, 0.5);
+}
+
+button:hover {
+    transform: scale(1.04);
+    box-shadow: 0 8px 25px rgba(244, 63, 94, 0.7);
+}
+
+.secondary-btn {
+    background: #3f3f46;
+    font-size: 14px;
+    padding: 10px 14px;
+    box-shadow: none;
+}
+.secondary-btn:hover {
+    background: #52525b;
+}
+
+.bike-option {
+    border: 2px solid #3f3f46;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    cursor: pointer;
+    background: #27272a;
+    transition: 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+}
+.bike-option.selected {
+    border-color: #dd2a7b;
+    background: rgba(221, 42, 123, 0.2);
+    box-shadow: 0 0 15px rgba(221, 42, 123, 0.4);
+}
+
+#controls {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    text-align: center;
+    background: rgba(15, 23, 42, 0.75);
+    padding: 10px 22px;
+    border-radius: 25px;
+    font-size: 14px;
+    backdrop-filter: blur(8px);
+    z-index: 5;
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.leaderboard-table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.leaderboard-table th, .leaderboard-table td {
+    padding: 8px;
+    border-bottom: 1px solid #3f3f46;
+    text-align: center;
+}
+.leaderboard-table th {
+    color: #f43f5e;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Reproductor de audio con selector musical -->
+<iframe id="music-player" width="0" height="0" src="https://www.youtube.com/embed/V6W3Mv9vL6k?autoplay=1&loop=1&playlist=V6W3Mv9vL6k" allow="autoplay" style="display:none;"></iframe>
+
+<div id="instagram-tag" onclick="openInstaModal()">
+    <span class="rainbow-text" style="font-size: 18px;">📸 IG: @___jere_777</span>
+</div>
+
+<div id="combo-popup">🔥 ¡CUELGUE PRO X2! 🔥</div>
+
+<div id="menu">
+    <div class="box" id="menu-box">
+        <div id="screen-register">
+            <h1 class="rainbow-text">🏍️ WHEELIE WORLD 3D</h1>
+            <div class="creator-tag">UNA OBRA MAESTRA DE <span class="rainbow-text" style="font-size: 16px;">JERE</span> 👑</div>
+            <p style="color: #d4d4d8;">Ingresá tu nombre para registrarte en la pista:</p>
+            <input type="text" id="username-input" placeholder="Tu nombre o apodo..." maxlength="15">
+            
+            <p style="font-size: 13px; color: #a1a1aa; margin-top: 15px;">¿Sos amigo de Jere? Ingresá tu código secreto:</p>
+            <input type="password" id="friend-code" placeholder="Código secreto (opcional)">
+            
+            <button onclick="registerUser()">¡ENTRAR AL JUEGO!</button>
+        </div>
+    </div>
+</div>
+
+<div id="ui" style="display: none;">
+    👤 <span id="display-user" class="rainbow-text">Jugador</span> | 🏆 Récord: <span id="record">0</span> m<br>
+    📏 Distancia: <span id="distance">0</span> m | 💰 Dinero: $<span id="money">0</span>
+</div>
+
+<div id="wheelie-indicator">🔥 ¡WHEELIE HACIA ADELANTE (INVERT)! 🔥</div>
+
+<div id="controls" style="display: none;">
+    W / ↑ = Acelerar &nbsp;|&nbsp; ESPACIO = Wheelie Delantero &nbsp;|&nbsp; A / D o ← / → = Carriles
+</div>
+
+<script>
+let scene, camera, renderer;
+let playing = false;
+let username = localStorage.getItem("ww_user") || "";
+let isFriend = localStorage.getItem("ww_friend") === "true";
+let selectedBikeColor = localStorage.getItem("ww_bike") || "red";
+let selectedMusic = localStorage.getItem("ww_music") || "V6W3Mv9vL6k";
+
+let money = Number(localStorage.getItem("money")) || 0;
+
+let upgrades = {
+    speed: Number(localStorage.getItem("up_speed")) || 1,
+    handling: Number(localStorage.getItem("up_handling")) || 1
+};
+
+let leaderboard = JSON.parse(localStorage.getItem("ww_leaderboard")) || [
+    { name: "Jere 👑", score: 1500 },
+    { name: "Marquitos", score: 920 },
+    { name: "Valentín", score: 650 }
+];
+
+let bikeGroup, frontWheel, rearWheel;
+let bike = {
+    x: 0,
+    targetX: 0,
+    z: 0,
+    speed: 0,
+    distance: 0,
+    isWheelie: false
+};
+
+let trafficCars = [];
+
+const keys = {};
+addEventListener("keydown", e => { keys[e.key.toLowerCase()] = true; });
+addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+if(username) {
+    showMainLobby();
+}
+
+function openInstaModal() {
+    alert("¡Seguí a @___jere_777 en Instagram para apoyar los juegos oficiales de Jere! 📸🔥");
+}
+
+function registerUser() {
+    let nameVal = document.getElementById("username-input").value.trim();
+    let codeVal = document.getElementById("friend-code").value.trim();
+
+    if(!nameVal) {
+        alert("¡Ponete un nombre para arrancar en la pista!");
+        return;
+    }
+
+    username = nameVal;
+    localStorage.setItem("ww_user", username);
+
+    if(codeVal === "2012") {
+        isFriend = true;
+        localStorage.setItem("ww_friend", "true");
+        alert("¡Código correcto! Modo AMIGO exclusivo desbloqueado por Jere 👑.");
+    } else {
+        isFriend = false;
+        localStorage.setItem("ww_friend", "false");
+    }
+
+    showMainLobby();
+}
+
+function changeMusic(selectObj) {
+    let videoId = selectObj.value;
+    selectedMusic = videoId;
+    localStorage.setItem("ww_music", videoId);
+    document.getElementById("music-player").src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
+}
+
+function showMainLobby() {
+    document.getElementById("ui").style.display = "block";
+    document.getElementById("controls").style.display = "block";
+    document.getElementById("display-user").textContent = username + (isFriend ? " ⭐ [Amigo]" : "");
+    
+    updateMenuUI();
+
+    let userRecordObj = leaderboard.find(item => item.name === username);
+    let myRecord = userRecordObj ? userRecordObj.score : 0;
+    document.getElementById("record").textContent = myRecord;
+
+    let leaderboardHTML = `
+        <table class="leaderboard-table">
+            <tr><th>#</th><th>Piloto</th><th>Récord (m)</th></tr>
+    `;
+    leaderboard.sort((a,b) => b.score - a.score);
+    leaderboard.slice(0, 5).forEach((entry, idx) => {
+        leaderboardHTML += `<tr><td>${idx+1}</td><td><b>${entry.name}</b></td><td>${entry.score} m</td></tr>`;
+    });
+    leaderboardHTML += `</table>`;
+
+    document.getElementById("menu-box").innerHTML = `
+        <h1 class="rainbow-text">⚡ MENÚ PRINCIPAL ⚡</h1>
+        <div class="creator-tag">CREADO POR <span class="rainbow-text">JERE</span></div>
+        <p>Piloto: <b>${username}</b> ${isFriend ? '👑' : ''} | 💰 Dinero: $<span id="menu-money">${money}</span></p>
+
+        <!-- Selector de Música -->
+        <div style="text-align: left; margin: 10px 0; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px;">
+            <div style="font-size: 13px; margin-bottom: 5px; color:#e4e4e7; font-weight:bold;">🎵 Música ATR para la Pista:</div>
+            <select onchange="changeMusic(this)">
+                <option value="V6W3Mv9vL6k" ${selectedMusic === 'V6W3Mv9vL6k' ? 'selected' : ''}>Motor / Electrónica Pro</option>
+                <option value="5qap5aO4i9A" ${selectedMusic === '5qap5aO4i9A' ? 'selected' : ''}>Lo-Fi Chill Concentración</option>
+                <option value="jfKfPfyJRdk" ${selectedMusic === 'jfKfPfyJRdk' ? 'selected' : ''}>Lo-Fi Beats Urbano</option>
+            </select>
+        </div>
+
+        <div style="text-align: left; margin: 10px 0; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px;">
+            <div style="font-size: 13px; margin-bottom: 5px; color:#e4e4e7; font-weight:bold;">🏆 Salón de la Fama Global:</div>
+            ${leaderboardHTML}
+        </div>
+
+        <div style="text-align: left; margin: 10px 0; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px;">
+            <div style="font-size: 12px; margin-bottom: 5px; color:#e4e4e7; font-weight:bold;">🔧 Taller y Motos Turras:</div>
+            <button class="secondary-btn" onclick="buyUpgrade('speed')">Velocidad Máx (Nv. <span id="lvl-speed">${upgrades.speed}</span>) - $<span id="cost-speed">${upgrades.speed * 100}</span></button>
+            <div style="display: flex; gap: 6px; margin-top: 6px;">
+                <div class="bike-option ${selectedBikeColor === 'red' ? 'selected' : ''}" onclick="selectBike('red')" style="flex:1; padding:8px; font-size:13px;">🔥 Roja</div>
+                <div class="bike-option ${selectedBikeColor === 'gold' ? 'selected' : ''}" onclick="selectBike('gold')" style="flex:1; padding:8px; font-size:13px;">🌟 Dorada</div>
+                <div class="bike-option ${selectedBikeColor === 'cyber' ? 'selected' : ''}" onclick="selectBike('cyber')" style="flex:1; padding:8px; font-size:13px;">⚡ Cyber</div>
+            </div>
+        </div>
+
+        <button onclick="startGame()">¡SALIR A RODAR YA!</button>
+        <button class="secondary-btn" style="background:#27272a; margin-top:6px;" onclick="logout()">Cambiar de usuario</button>
+    `;
+}
+
+function selectBike(color) {
+    if((color === 'gold' || color === 'cyber') && !isFriend) {
+        alert("¡Epa! Estas motos especiales son exclusivas para amigos con código secreto de Jere.");
+        return;
+    }
+    selectedBikeColor = color;
+    localStorage.setItem("ww_bike", color);
+    showMainLobby();
+}
+
+function logout() {
+    localStorage.removeItem("ww_user");
+    localStorage.removeItem("ww_friend");
+    location.reload();
+}
+
+function updateMenuUI() {
+    document.getElementById("money").textContent = money;
+    let mm = document.getElementById("menu-money");
+    if(mm) mm.textContent = money;
+}
+
+function buyUpgrade(type) {
+    let cost = upgrades.speed * 100;
+    if(money >= cost) {
+        money -= cost;
+        upgrades.speed++;
+        localStorage.setItem("money", money);
+        localStorage.setItem("up_speed", upgrades.speed);
+        showMainLobby();
+    }
+}
+
+function init3D() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0f);
+    scene.fog = new THREE.FogExp2(0x0a0a0f, 0.012);
+
+    camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 3.5, 7);
+    camera.lookAt(0, 1.2, 0);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    dirLight.position.set(20, 40, 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    const roadGeo = new THREE.PlaneGeometry(16, 6000);
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.9 });
+    const road = new THREE.Mesh(roadGeo, roadMat);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(0, 0, -3000);
+    scene.add(road);
+
+    for(let z = 0; z > -6000; z -= 30) {
+        let lineGeo = new THREE.PlaneGeometry(0.4, 12);
+        let lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+        let line = new THREE.Mesh(lineGeo, lineMat);
+        line.rotation.x = -Math.PI / 2;
+        line.position.set(-2.2, 0.02, z);
+        scene.add(line);
+
+        let line2 = new THREE.Mesh(lineGeo, lineMat);
+        line2.rotation.x = -Math.PI / 2;
+        line2.position.set(2.2, 0.02, z);
+        scene.add(line2);
+    }
+
+    createDetailedBike3D();
+    createTrafficAndEnvironment();
+}
+
+function createDetailedBike3D() {
+    bikeGroup = new THREE.Group();
+
+    let mainColor = 0xf43f5e;
+    if(selectedBikeColor === 'gold') mainColor = 0xeab308;
+    if(selectedBikeColor === 'cyber') mainColor = 0x06b6d4;
+
+    const wheelGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.35, 24);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4 });
+    
+    rearWheel = new THREE.Mesh(wheelGeo, wheelMat);
+    rearWheel.position.set(0, 0.7, -1.3);
+    rearWheel.castShadow = true;
+    bikeGroup.add(rearWheel);
+
+    frontWheel = new THREE.Mesh(wheelGeo, wheelMat);
+    frontWheel.position.set(0, 0.7, 1.3);
+    frontWheel.castShadow = true;
+    bikeGroup.add(frontWheel);
+
+    const bodyGeo = new THREE.BoxGeometry(0.9, 0.8, 2.2);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: mainColor, metalness: 0.7, roughness: 0.3 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.set(0, 1.2, 0);
+    body.castShadow = true;
+    bikeGroup.add(body);
+
+    const handleGeo = new THREE.BoxGeometry(1.6, 0.2, 0.3);
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const handle = new THREE.Mesh(handleGeo, handleMat);
+    handle.position.set(0, 1.8, 1.0);
+    bikeGroup.add(handle);
+
+    const torsoGeo = new THREE.BoxGeometry(0.7, 1.0, 0.5);
+    const torsoMat = new THREE.MeshStandardMaterial({ color: selectedBikeColor === 'cyber' ? 0x8b5cf6 : 0x0284c7 });
+    const torso = new THREE.Mesh(torsoGeo, torsoMat);
+    torso.position.set(0, 2.1, -0.2);
+    bikeGroup.add(torso);
+
+    const headGeo = new THREE.SphereGeometry(0.35, 16, 16);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.set(0, 2.8, -0.1);
+    bikeGroup.add(head);
+
+    const visorGeo = new THREE.BoxGeometry(0.3, 0.15, 0.2);
+    const visorMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+    const visor = new THREE.Mesh(visorGeo, visorMat);
+    visor.position.set(0, 2.8, 0.22);
+    bikeGroup.add(visor);
+
+    scene.add(bikeGroup);
+}
+
+function createTrafficAndEnvironment() {
+    for(let z = -100; z > -6000; z -= 140) {
+        let laneChoice = (Math.floor(Math.random() * 3) - 1) * 3.5;
+        
+        let carGroup = new THREE.Group();
+        
+        const carBodyGeo = new THREE.BoxGeometry(2.2, 1.2, 4.5);
+        let carColors = [0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6];
+        let randomColor = carColors[Math.floor(Math.random() * carColors.length)];
+        const carMat = new THREE.MeshStandardMaterial({ color: randomColor, metalness: 0.6 });
+        let carBody = new THREE.Mesh(carBodyGeo, carMat);
+        carBody.position.set(0, 0.8, 0);
+        carBody.castShadow = true;
+        carGroup.add(carBody);
+
+        const carTopGeo = new THREE.BoxGeometry(1.8, 0.9, 2.4);
+        const carTopMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 });
+        let carTop = new THREE.Mesh(carTopGeo, carTopMat);
+        carTop.position.set(0, 1.7, -0.2);
+        carGroup.add(carTop);
+
+        carGroup.position.set(laneChoice, 0, z);
+        scene.add(carGroup);
+        trafficCars.push(carGroup);
+    }
+}
+
+function startGame() {
+    document.getElementById("menu").style.display = "none";
+    playing = true;
+    bike.z = 0;
+    bike.x = 0;
+    bike.targetX = 0;
+    bike.speed = 0.5;
+    bike.distance = 0;
+    bike.isWheelie = false;
+    trafficCars = [];
+    
+    if(!scene) {
+        init3D();
+    }
+    requestAnimationFrame(gameLoop);
+}
+
+function showPopup(text) {
+    let p = document.getElementById("combo-popup");
+    p.textContent = text;
+    p.style.display = "block";
+    setTimeout(() => { p.style.display = "none"; }, 600);
+}
+
+function update() {
+    let maxSpd = 0.8 + (upgrades.speed * 0.12);
+    let handlingSpeed = 0.18;
+
+    if(keys["w"] || keys["arrowup"]) {
+        bike.speed += 0.02;
+    } else {
+        bike.speed -= 0.005;
+    }
+    bike.speed = Math.max(0.3, Math.min(bike.speed, maxSpd));
+
+    // WHEELIE HACIA ADELANTE (INVERT / ESTILO ARGENTINO CON BARRA ESPACIADORA)
+    if(keys[" "]) {
+        if(!bike.isWheelie) {
+            showPopup("🔥 ¡COMIENZA EL CUELGUE! 🔥");
+        }
+        bike.isWheelie = true;
+        document.getElementById("wheelie-indicator").style.display = "block";
+    } else {
+        bike.isWheelie = false;
+        document.getElementById("wheelie-indicator").style.display = "none";
+    }
+
+    if((keys["a"] || keys["arrowleft"]) && bike.targetX > -3.5) {
+        bike.targetX = -3.5;
+    }
+    if((keys["d"] || keys["arrowright"]) && bike.targetX < 3.5) {
+        bike.targetX = 3.5;
+    }
+
+    bike.x += (bike.targetX - bike.x) * handlingSpeed;
+    bike.z -= bike.speed;
+    
+    let distanceMultiplier = bike.isWheelie ? 2.5 : 1.0;
+    bike.distance += bike.speed * distanceMultiplier * 2;
+
+    if(bikeGroup) {
+        bikeGroup.position.x = bike.x;
+        bikeGroup.position.z = bike.z;
+        
+        // Inclinación hacia ADELANTE (¡Estilo wheelie frontal argentino!)
+        if(bike.isWheelie) {
+            bikeGroup.rotation.x = 0.42;
+            camera.position.set(bike.x * 0.5, 3.0, bike.z + 6.5);
+        } else {
+            bikeGroup.rotation.x = 0;
+            camera.position.set(bike.x * 0.5, 3.5, bike.z + 7);
+        }
+
+        camera.lookAt(bike.x, 1.2, bike.z - 5);
+
+        rearWheel.rotation.x -= bike.speed * 0.5;
+        frontWheel.rotation.x -= bike.speed * 0.5;
+    }
+
+    for(let car of trafficCars) {
+        let distZ = Math.abs(car.position.z - bike.z);
+        let distX = Math.abs(car.position.x - bike.x);
+        if(distZ < 2.5 && distX < 1.6) {
+            crash();
+        }
+    }
+
+    document.getElementById("distance").textContent = Math.floor(bike.distance);
+}
+
+function crash() {
+    playing = false;
+    document.getElementById("wheelie-indicator").style.display = "none";
+    let score = Math.floor(bike.distance);
+    let earned = score * (isFriend ? 3 : 2);
+
+    let existingUser = leaderboard.find(item => item.name === username);
+    if(existingUser) {
+        if(score > existingUser.score) {
+            existingUser.score = score;
+        }
+    } else {
+        leaderboard.push({ name: username, score: score });
+    }
+    localStorage.setItem("ww_leaderboard", JSON.stringify(leaderboard));
+
+    money += earned;
+    localStorage.setItem("money", money);
+    updateMenuUI();
+
+    document.getElementById("menu").style.display = "flex";
+    showMainLobby();
+}
+
+function gameLoop() {
+    if(!playing) return;
+    update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(gameLoop);
+}
+
+addEventListener("resize", () => {
+    if(camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+});
+</script>
+
+</body>
+</html>
